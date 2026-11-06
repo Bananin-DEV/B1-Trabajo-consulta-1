@@ -1,0 +1,37 @@
+case class Repuesto(nombre: String, categoria: String, precio: Double, stock: Int)
+
+val repuestos = List(
+  Repuesto("Pastillas de Freno", "Frenos", 25.0, 15),
+  Repuesto("Disco de Freno", "Frenos", 45.0, 8),
+  Repuesto("Amortiguador Delantero", "Suspension", 65.0, 4),
+  Repuesto("Espiral Trasero", "Suspension", 50.0, 6),
+  Repuesto("Filtro de Aceite", "Motor", 8.0, 30),
+  Repuesto("Filtro de Aire", "Motor", 12.0, 20),
+  Repuesto("Bujia Iridium", "Motor", 10.0, 40),
+  Repuesto("Kit de Embrague", "Transmision", 120.0, 3),
+  Repuesto("Aceite 10W40", "Lubricantes", 28.0, 18),
+  Repuesto("Refrigerante", "Refrigeracion", 15.0, 12)
+)
+
+// --- 4 OPERACIONES NUEVAS ---
+
+// 1. sortBy: Ordenar por precio ascendente
+val porPrecio = repuestos.sortBy(_.precio)
+
+// 2. groupBy: Agrupar productos por su categoría
+val porCategoria = repuestos.groupBy(_.categoria)
+
+// 3. partition: Dividir en (stock suficiente >= 5, stock bajo < 5)
+val (stockOptimo, stockBajo) = repuestos.partition(_.stock >= 5)
+
+// 4. find: Buscar el primer repuesto de la categoría 'Suspension'
+val primerSuspension = repuestos.find(_.categoria == "Suspension")
+
+
+// --- 4.3 COMBINACIÓN DE OPERACIONES ---
+// Pregunta: ¿Cuáles repuestos de 'Motor' tienen stock > 10 ordenados por precio descendente?
+// Combina: groupBy (nueva) -> filter (clase) -> sortBy (nueva)
+val repuestosMotorTop = repuestos
+  .groupBy(_.categoria)("Motor")
+  .filter(_.stock > 10)
+  .sortBy(-_.precio)
