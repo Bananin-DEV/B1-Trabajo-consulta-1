@@ -1,0 +1,29 @@
+from collections import namedtuple
+from functools import reduce
+
+Repuesto = namedtuple("Repuesto", ["nombre", "categoria", "precio", "stock"])
+
+repuestos = [
+    Repuesto("Pastillas de Freno", "Frenos", 25.0, 15),
+    Repuesto("Disco de Freno", "Frenos", 45.0, 8),
+    Repuesto("Amortiguador Delantero", "Suspension", 65.0, 4),
+    Repuesto("Espiral Trasero", "Suspension", 50.0, 6),
+    Repuesto("Filtro de Aceite", "Motor", 8.0, 30),
+    Repuesto("Filtro de Aire", "Motor", 12.0, 20),
+    Repuesto("Bujia Iridium", "Motor", 10.0, 40),
+    Repuesto("Kit de Embrague", "Transmision", 120.0, 3),
+    Repuesto("Aceite 10W40", "Lubricantes", 28.0, 18),
+    Repuesto("Refrigerante", "Refrigeracion", 15.0, 12)
+]
+
+# 1. Selección (filter)
+repuestos_criticos = list(filter(lambda r: r.stock < 5, repuestos))
+
+# 2. Transformación (map)
+precios_facturacion = list(map(lambda r: f"{r.nombre.upper()} -> ${r.precio * 1.15:.2f}", repuestos))
+
+# 3. Extremos (max con lambda key)
+repuesto_mas_caro = max(repuestos, key=lambda r: r.precio)
+
+# 4. Acumulación (reduce)
+total_inventario = reduce(lambda acc, r: acc + (r.precio * r.stock), repuestos, 0.0)
