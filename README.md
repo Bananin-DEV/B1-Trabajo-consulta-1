@@ -140,7 +140,7 @@ Para asegurar que los tres lenguajes operen exactamente bajo el mismo escenario 
 * **Pregunta que responde:** ¿Cómo convierto cada elemento en otro valor?
 * **Solución en Scala:**
   ```scala
-  val facturacion = repuestos.map(r => s"${r.nombre.toUpperCase} -> $$${r.precio * 1.15}")
+  val facturacion = repuestos.map(r => r.nombre.toUpperCase + " -> $" + (r.precio * 1.15)) 
   ```
 * **Solución en Java:**
   ```java
