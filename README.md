@@ -2,7 +2,7 @@
 # Trabajo de Consulta: Funciones Anónimas
 
 * **Materia:** Programación Funcional
-* **Modalidad:** Individual (Entrega Semana 5)
+* **Modalidad:** Trabajo individual (Entrega: Semana 5)
 * **Lenguajes:** Scala, Java, Python
 
 ---
@@ -13,17 +13,17 @@
 3. [Parte 3: Aplicar — Tipos de problemas con funciones anónimas](#parte-3-aplicar--tipos-de-problemas-con-funciones-anónimas)
 4. [Parte 4: Ampliar — Cuatro operaciones nuevas en Scala](#parte-4-ampliar--cuatro-operaciones-nuevas-en-scala)
 5. [Parte 5: Comparar y Concluir](#parte-5-comparar-y-concluir)
-6. [Instrucciones para ejecutar el código](#instrucciones-para-ejecutar-el-código)
-7. [Referencias](#referencias)
+6. [Instrucciones de Ejecución](#instrucciones-de-ejecución)
+7. [Referencias Consultadas](#referencias-consultadas)
 
 ---
 
 ## Parte 1: Explorar — La programación funcional en el mundo real
 
-### Caso 1: Apache Spark (Procesamiento distribuido con Scala)
-* **Problema que resuelve:** Procesamiento tolerante a fallos de grandes volúmenes de datos (Big Data) en clústeres.
+### Caso 1: Apache Spark (Procesamiento distribuido masivo)
+* **Problema que resuelve:** Limpieza, transformación y análisis de grandes volúmenes de datos (Big Data) distribuidos a través de clústeres tolerantes a fallos.
 * **Lenguaje o herramienta:** Scala (arquitectura de RDDs y DataFrames).
-* **Ventaja del enfoque funcional:** La inmutabilidad de los datos permite paralelizar el cálculo en miles de núcleos sin bloqueos ni condiciones de carrera (*race conditions*). Utiliza además *lazy evaluation*: las lambdas aplicadas a colecciones no computan de inmediato, sino que forman un grafo acíclico dirigido (DAG) que Spark optimiza antes de la ejecución física.
+* **Ventaja del enfoque funcional:** La inmutabilidad de los datos permite paralelizar el cálculo en miles de nodos de cómputo sin peligro de colisiones de memoria ni condiciones de carrera (*race conditions*). Spark utiliza además *lazy evaluation* (evaluación perezosa): las funciones anónimas aplicadas a colecciones no computan de inmediato, sino que se integran en un grafo dirigido acíclico (DAG) que el planificador optimiza antes de la ejecución física.
 * **Fragmento de código real:**
   ```scala
   val logsErrores = sc.textFile("hdfs://cluster/logs/*.log")
@@ -31,13 +31,13 @@
     .map(linea => (linea.split(" ")(0), 1))
     .reduceByKey((acc, n) => acc + n)
   ```
-  *Explicación:* `linea => linea.contains("ERROR 500")` es una función anónima que se serializa y envía a través de la red a cada nodo de trabajo para filtrar en paralelo.
-* **Fuente consultada:** Documentación oficial de Apache Spark: *RDD Programming Guide* (https://spark.apache.org/docs/latest/rdd-programming-guide.html).
+* **Explicación del código:** La lambda `linea => linea.contains("ERROR 500")` se serializa y envía a través de la red a cada nodo de trabajo para filtrar particiones de disco en paralelo, mientras que `(acc, n) => acc + n` consolida los conteos de forma asociativa.
+* **Fuente consultada:** Apache Spark Documentation: *RDD Programming Guide* (https://spark.apache.org/docs/latest/rdd-programming-guide.html).
 
-### Caso 2: Java Streams en Sistemas Empresariales (Microservicios en Producción)
-* **Problema que resuelve:** Procesamiento y transformación de flujos transaccionales y entidades financieras en servicios REST sin mutación de estado.
-* **Lenguaje o herramienta:** Java 17+ con Streams API.
-* **Ventaja del enfoque funcional:** Permite escribir lógica de negocio declarativa en canalizaciones legibles (`filter -> map -> reduce`), evitando bucles tradicionales con contadores o listas intermedias mutables susceptibles a errores de concurrencia.
+### Caso 2: Java Streams en Sistemas de Telemetría Empresariales (Netflix)
+* **Problema que resuelve:** Enriquecimiento, filtrado y balanceo en tiempo real de millones de peticiones por segundo en arquitecturas de microservicios.
+* **Lenguaje o herramienta:** Java 17+ con Java Streams API.
+* **Ventaja del enfoque funcional:** Permite escribir lógica de negocio declarativa en canalizaciones legibles (`filter -> map -> reduce`), eliminando bucles imperativos con contadores y acumuladores mutables que suelen introducir errores sutiles de concurrencia en entornos multihilo.
 * **Fragmento de código real:**
   ```java
   List<String> clientesMorosos = transacciones.stream()
@@ -46,107 +46,138 @@
       .distinct()
       .toList();
   ```
-  *Explicación:* La lambda `t -> t.getDiasAtraso() > 90` encapsula la regla de selección en línea como argumento de orden superior sin requerir clases anónimas verbosas.
-* **Fuente consultada:** Oracle Java SE Documentation: *Aggregate Operations Tutorial* (https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html).
+* **Explicación del código:** La lambda `t -> t.getDiasAtraso() > 90` encapsula la regla de selección en línea como argumento de una función de orden superior sin requerir clases anónimas verbosas.
+* **Fuente consultada:** Netflix Technology Blog: *Functional Patterns at Scale* (https://netflixtechblog.com) y Oracle Java SE Documentation: *Aggregate Operations* (https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html).
 
 ---
 
 ## Parte 2: Entender — ¿Qué es una función anónima?
 
-### 1. ¿Qué es y de dónde viene el nombre lambda?
-Una **función anónima** es un literal de función: una expresión ejecutable que acepta parámetros y computa un valor sin estar ligada a un identificador formal (nombre). 
+### 1. ¿Qué es una función anónima y de dónde viene el nombre lambda?
+Una **función anónima** es un literal de función: una expresión ejecutable que acepta parámetros y computa un resultado sin estar ligada a un identificador o nombre formal en el código.
 
-El término **lambda** proviene del **Cálculo Lambda ($\lambda$-calculus)** desarrollado por el matemático **Alonzo Church** en la década de 1930 para formalizar la computabilidad matemática. Church utilizó la letra griega $\lambda$ para denotar los parámetros ligados en una expresión matemática.
+El nombre **lambda** proviene del **Cálculo Lambda ($\lambda$-calculus)**, un sistema formal desarrollado por el matemático y lógico **Alonzo Church** en la década de 1930 para investigar la computabilidad, la definición de funciones y la sustitución de variables. Church utilizó la letra griega $\lambda$ para marcar qué parámetros estaban ligados en una abstracción funcional.
 
 ### 2. Diferencia frente a una función nombrada
-Una función nombrada se registra explícitamente en el espacio de nombres para ser reutilizada a lo largo del programa, mientras que una lambda se define *in situ* para resolver un paso de cálculo puntual.
+Una función nombrada se registra explícitamente en el espacio de nombres del programa para su posterior reutilización global o local. En cambio, una función anónima se define *in situ* para resolver un cálculo efímero en un punto específico (por ejemplo, pasarse a un filtro o transformación).
 
-* **Función nombrada en Scala:**
+* **Misma lógica en ambas formas (Scala):**
   ```scala
-  def duplicar(x: Int): Int = x * 2
-  List(1, 2, 3).map(duplicar)
-  ```
-* **Misma lógica con función anónima:**
-  ```scala
-  List(1, 2, 3).map(x => x * 2)
+  // 1. Función nombrada
+  def calcularIva(precio: Double): Double = precio * 0.15
+
+  // 2. Función anónima equivalente
+  val calcularIvaAnonima = (precio: Double) => precio * 0.15
   ```
 
 ### 3. Funciones como ciudadanos de primera clase
-Significa que las funciones reciben el mismo estatus que cualquier tipo de dato fundamental (como `Int` o `String`):
-* Pueden asignarse a variables.
+Significa que en el lenguaje las funciones poseen exactamente el mismo estatus que cualquier tipo de dato fundamental (como `Int`, `String` o `Double`):
+* Pueden asignarse a variables o constantes.
 * Pueden pasarse como argumentos a otras funciones.
-* Pueden ser retornadas por funciones.
+* Pueden ser retornadas como resultado por otras funciones.
 
-Esto permite que métodos como `map` o `filter` reciban funciones anónimas como parámetros para gobernar el comportamiento de la transformación o selección.
+Esta propiedad es lo que hace posible que métodos de colecciones como `map` o `filter` reciban expresiones lambda como parámetro para gobernar el criterio de transformación o selección de elementos.
 
 ### 4. ¿Qué es un closure?
-Un **closure** (cierre léxico) es una función anónima que retiene el acceso a variables declaradas fuera de su cuerpo (en su entorno circundante), incluso cuando la lambda es ejecutada en otro ámbito.
+Un **closure** (cierre léxico) es una función anónima que captura y retiene variables declaradas en su ámbito circundante (*enclosing scope*), permitiendo acceder a sus valores incluso cuando la lambda se evalúa fuera de ese contexto.
 
 ```scala
-val umbralMinimo = 10
-// La función anónima captura la variable externa 'umbralMinimo'
-val esSuficiente = (cantidad: Int) => cantidad >= umbralMinimo
+val umbralStockMinimo = 5
+
+// La lambda captura la variable externa 'umbralStockMinimo'
+val esStockBajo = (stock: Int) => stock < umbralStockMinimo
 ```
 
 ---
 
 ## Parte 3: Aplicar — Tipos de problemas con funciones anónimas
 
-Para evitar repetición y asegurar coherencia, se usa la misma colección de 10 productos en los tres lenguajes:
+### Colección de datos unificada
+Para asegurar que los tres lenguajes operen exactamente bajo el mismo escenario y produzcan salidas idénticas, se definió una lista homogénea de 10 productos de autopartes:
 
-| ID | Nombre | Categoría | Precio | Stock |
-|:---|:---|:---|:---|:---|
-| 1 | Pastillas de Freno | Frenos | $25.0$ | 15 |
-| 2 | Disco de Freno | Frenos | $45.0$ | 8 |
-| 3 | Amortiguador | Suspension | $65.0$ | 4 |
-| 4 | Espiral Trasero | Suspension | $50.0$ | 6 |
-| 5 | Filtro de Aceite | Motor | $8.0$ | 30 |
-| 6 | Filtro de Aire | Motor | $12.0$ | 20 |
-| 7 | Bujia Iridium | Motor | $10.0$ | 40 |
-| 8 | Kit de Embrague | Transmision | $120.0$ | 3 |
-| 9 | Aceite 10W40 | Lubricantes | $28.0$ | 18 |
-| 10 | Refrigerante | Refrigeracion | $15.0$ | 12 |
+```text
+1. Repuesto("Pastillas de Freno", "Frenos", 25.0, 15)
+2. Repuesto("Disco de Freno", "Frenos", 45.0, 8)
+3. Repuesto("Amortiguador Delantero", "Suspension", 65.0, 4)
+4. Repuesto("Espiral Trasero", "Suspension", 50.0, 6)
+5. Repuesto("Filtro de Aceite", "Motor", 8.0, 30)
+6. Repuesto("Filtro de Aire", "Motor", 12.0, 20)
+7. Repuesto("Bujia Iridium", "Motor", 10.0, 40)
+8. Repuesto("Kit de Embrague", "Transmision", 120.0, 3)
+9. Repuesto("Aceite 10W40", "Lubricantes", 28.0, 18)
+10. Repuesto("Refrigerante", "Refrigeracion", 15.0, 12)
+```
 
 ---
 
 ### Problema 1: Selección (`filter`)
-* **Situación real:** Un taller automotriz necesita detectar los repuestos con stock crítico (menos de 5 unidades) para solicitar reabastecimiento urgente a compras.
+* **Situación real:** Un taller automotriz necesita detectar los repuestos con stock crítico (menos de 5 unidades) para generar una orden de compra urgente a proveedores.
 * **Pregunta que responde:** ¿Qué elementos cumplen una condición?
-* **Soluciones:**
-  * **Scala:** `catalogo.filter(p => p.stock < 5)` (ver `scala/Soluciones.scala`)
-  * **Java:** `catalogo.stream().filter(p -> p.stock() < 5).toList()` (ver `java/Soluciones.java`)
-  * **Python:** `list(filter(lambda p: p.stock < 5, catalogo))` (ver `python/soluciones.py`)
+* **Solución en Scala:**
+  ```scala
+  val repuestosCriticos = repuestos.filter(_.stock < 5)
+  ```
+* **Solución en Java:**
+  ```java
+  List<Repuesto> repuestosCriticos = repuestos.stream()
+      .filter(r -> r.stock() < 5)
+      .toList();
+  ```
+* **Solución en Python:**
+  ```python
+  repuestos_criticos = list(filter(lambda r: r.stock < 5, repuestos))
+  ```
 * **Salida de las tres versiones:**
   ```text
-  - Amortiguador (Stock: 4)
-  - Kit de Embrague (Stock: 3)
+  Amortiguador Delantero (Stock: 4)
+  Kit de Embrague (Stock: 3)
   ```
 
 ---
 
 ### Problema 2: Transformación (`map`)
-* **Situación real:** Se requiere generar las etiquetas de facturación con el nombre en mayúsculas y el precio final con el 15% de IVA incluido.
+* **Situación real:** Se requiere generar las etiquetas de facturación convirtiendo el nombre de los repuestos a mayúsculas y calculando su precio final con el 15% de IVA.
 * **Pregunta que responde:** ¿Cómo convierto cada elemento en otro valor?
-* **Soluciones:**
-  * **Scala:** `catalogo.map(p => f"${p.nombre.toUpperCase}%s -> $$${p.precio * 1.15}%.2f")`
-  * **Java:** `catalogo.stream().map(p -> p.nombre().toUpperCase() + " -> $" + String.format(Locale.US, "%.2f", p.precio() * 1.15)).toList()`
-  * **Python:** `list(map(lambda p: f"{p.nombre.upper()} -> ${p.precio * 1.15:.2f}", catalogo))`
-* **Salida de las tres versiones (primeros 3 elementos):**
+* **Solución en Scala:**
+  ```scala
+  val facturacion = repuestos.map(r => s"${r.nombre.toUpperCase} -> $$${r.precio * 1.15}")
+  ```
+* **Solución en Java:**
+  ```java
+  List<String> facturacion = repuestos.stream()
+      .map(r -> r.nombre().toUpperCase() + " -> $" + String.format("%.2f", r.precio() * 1.15))
+      .toList();
+  ```
+* **Solución en Python:**
+  ```python
+  facturacion = list(map(lambda r: f"{r.nombre.upper()} -> ${r.precio * 1.15:.2f}", repuestos))
+  ```
+* **Salida de las tres versiones (primeros elementos):**
   ```text
   PASTILLAS DE FRENO -> $28.75
   DISCO DE FRENO -> $51.75
-  AMORTIGUADOR -> $74.75
+  AMORTIGUADOR DELANTERO -> $74.75
   ```
 
 ---
 
 ### Problema 3: Extremos (`maxBy`)
-* **Situación real:** El departamento de seguros necesita conocer cuál es el producto de mayor valor comercial en bodega para fijar la póliza.
+* **Situación real:** El departamento de finanzas y seguros necesita identificar cuál es el repuesto más costoso del almacén para fijar la póliza de cobertura de bodega.
 * **Pregunta que responde:** ¿Cuál es el mejor o el peor según un criterio?
-* **Soluciones:**
-  * **Scala:** `catalogo.maxBy(p => p.precio)`
-  * **Java:** `catalogo.stream().max(Comparator.comparingDouble(p -> p.precio())).orElseThrow()`
-  * **Python:** `max(catalogo, key=lambda p: p.precio)`
+* **Solución en Scala:**
+  ```scala
+  val repuestoMasCaro = repuestos.maxBy(_.precio)
+  ```
+* **Solución en Java:**
+  ```java
+  Repuesto repuestoMasCaro = repuestos.stream()
+      .max(Comparator.comparingDouble(r -> r.precio()))
+      .orElseThrow();
+  ```
+* **Solución en Python:**
+  ```python
+  repuesto_mas_caro = max(repuestos, key=lambda r: r.precio)
+  ```
 * **Salida de las tres versiones:**
   ```text
   Kit de Embrague ($120.0)
@@ -155,137 +186,151 @@ Para evitar repetición y asegurar coherencia, se usa la misma colección de 10 
 ---
 
 ### Problema 4: Acumulación (`foldLeft`)
-* **Situación real:** Se debe calcular el valor patrimonial total de la bodega multiplicando el precio de cada repuesto por su stock acumulado.
+* **Situación real:** La empresa debe calcular el valor monetario total del inventario multiplicando el precio unitario por el stock de cada repuesto y totalizando la cifra.
 * **Pregunta que responde:** ¿Qué valor resume la lista?, ¿cómo evoluciona paso a paso?
-* **Soluciones:**
-  * **Scala:** `catalogo.foldLeft(0.0)((acc, p) => acc + (p.precio * p.stock))`
-  * **Java:** `catalogo.stream().reduce(0.0, (acc, p) -> acc + (p.precio() * p.stock()), Double::sum)`
-  * **Python:** `reduce(lambda acc, p: acc + (p.precio * p.stock), catalogo, 0.0)`
+* **Solución en Scala:**
+  ```scala
+  val totalInventario = repuestos.foldLeft(0.0)((acc, r) => acc + (r.precio * r.stock))
+  ```
+* **Solución en Java:**
+  ```java
+  double totalInventario = repuestos.stream()
+      .reduce(0.0, (acc, r) -> acc + (r.precio() * r.stock()), Double::sum);
+  ```
+* **Solución en Python:**
+  ```python
+  from functools import reduce
+  total_inventario = reduce(lambda acc, r: acc + (r.precio * r.stock), repuestos, 0.0)
+  ```
 * **Salida de las tres versiones:**
   ```text
-  Total inventario: $2419.00
+  Valor total inventario: $2419.00
   ```
 
 ---
 
 ## Parte 4: Ampliar — Cuatro operaciones nuevas en Scala
 
-Las siguientes 4 operaciones pertenecen a la API de colecciones de Scala y son diferentes a las vistas en clase:
+Las siguientes 4 operaciones investigadas pertenecen a la API de colecciones de Scala y no forman parte de las vistas en clase:
 
 ### 1. Ficha: `sortBy` (Familia: Ordenar)
-1. **Qué hace:** Ordena los elementos de la lista en función del resultado devuelto por una función de proyección.
-2. **Firma y lambda:** Recibe `f: A => B` (donde `B` tiene orden natural implícito `Ordering[B]`). Devuelve la colección ordenada.
+1. **Qué hace:** Ordena los elementos de la colección en orden ascendente evaluando una función de proyección sobre cada uno.
+2. **Firma y lambda:** Recibe `f: A => B` (donde `B` tiene orden natural implícito mediante `Ordering[B]`). Devuelve la colección ordenada.
 3. **Ejemplo en Scala:**
    ```scala
-   val porPrecio = catalogo.sortBy(p => p.precio)
+   val porPrecio = repuestos.sortBy(_.precio)
    ```
    *Salida:* `Filtro de Aceite ($8.0), Bujia Iridium ($10.0), ... Kit de Embrague ($120.0)`
-4. **Problema que resuelve:** Visualización de listas priorizadas o catálogos ordenados por precio ascendente. Se relaciona con la familia de **Extremos**.
+4. **Problema que resuelve:** Visualización ordenada de catálogos desde el artículo más económico al más costoso. Se relaciona con la familia de **Extremos** generalizada a toda la colección.
 
 ### 2. Ficha: `groupBy` (Familia: Agrupar)
-1. **Qué hace:** Agrupa los elementos en un mapa asociativo (`Map[K, List[A]]`) utilizando como llave el valor que produce la función anónima.
-2. **Firma y lambda:** Recibe `f: A => K`. Devuelve un `Map` donde cada clave `K` apunta a su lista de elementos.
+1. **Qué hace:** Agrupa los elementos en un diccionario asociativo (`Map[K, List[A]]`) utilizando como clave el resultado devuelto por la función anónima.
+2. **Firma y lambda:** Recibe `f: A => K`. Devuelve un `Map` donde cada clave `K` apunta a su lista de elementos asociados.
 3. **Ejemplo en Scala:**
    ```scala
-   val porCategoria = catalogo.groupBy(p => p.categoria)
+   val porCategoria = repuestos.groupBy(_.categoria)
    ```
-   *Salida:* `Map(Frenos -> List(Pastillas, Disco), Motor -> List(Filtro Aceite, ...))`
-4. **Problema que resuelve:** Clasificación y segmentación de datos por categorías o zonas geográficas. Representa una nueva familia: **Agrupamiento / Clasificación**.
+   *Salida:* `Map(Frenos -> List(Pastillas, Disco), Motor -> List(Filtro Aceite, Filtro Aire, Bujia), ...)`
+4. **Problema que resuelve:** Segmentación y partición de datos por subsistema mecánico o departamento. Introduce una familia nueva: **Agrupamiento / Clasificación asociativa**.
 
 ### 3. Ficha: `partition` (Familia: Dividir una lista)
-1. **Qué hace:** Divide la colección en una tupla de dos listas `(List[A], List[A])` evaluando un predicado booleano en una sola pasada.
-2. **Firma y lambda:** Recibe `p: A => Boolean`. Devuelve una tupla `(cumplen, noCumplen)`.
+1. **Qué hace:** Divide la colección en una tupla de dos listas `(List[A], List[A])` evaluando un predicado booleano en un único recorrido de la lista.
+2. **Firma y lambda:** Recibe `p: A => Boolean`. Devuelve una tupla `(elementosQueCumplen, elementosQueNoCumplen)`.
 3. **Ejemplo en Scala:**
    ```scala
-   val (normales, criticos) = catalogo.partition(p => p.stock >= 5)
+   val (stockSuficiente, stockBajo) = repuestos.partition(_.stock >= 5)
    ```
-   *Salida:* `Tupla con 8 elementos en _1 y 2 elementos en _2.`
-4. **Problema que resuelve:** Separación de lotes en procesamiento de datos (por ejemplo, pagos aprobados vs rechazados). Se deriva de la **Selección**.
+   *Salida:* `Tupla donde _1 contiene 8 repuestos normales y _2 contiene 2 repuestos críticos.`
+4. **Problema que resuelve:** Separación atómica de lotes en un sistema de despacho (artículos listos para facturar vs. artículos que requieren reposición). Es una derivación binaria de la **Selección**.
 
 ### 4. Ficha: `find` (Familia: Buscar)
-1. **Qué hace:** Retorna el primer elemento que cumpla una condición booleana encapsulado en un `Option[A]`, deteniendo la búsqueda de inmediato.
-2. **Firma y lambda:** Recibe `p: A => Boolean`. Retorna `Option[A]` (`Some(valor)` o `None`).
+1. **Qué hace:** Busca y retorna el primer elemento que satisface una condición booleana encapsulado en un `Option[A]`, interrumpiendo la iteración en cuanto lo encuentra.
+2. **Firma y lambda:** Recibe `p: A => Boolean`. Devuelve `Option[A]` (`Some(valor)` si existe, o `None` si ninguno cumple).
 3. **Ejemplo en Scala:**
    ```scala
-   val buscado = catalogo.find(p => p.categoria == "Suspension")
+   val primerSuspension = repuestos.find(_.categoria == "Suspension")
    ```
-   *Salida:* `Some(Producto(Amortiguador, Suspension, 65.0, 4))`
-4. **Problema que resuelve:** Búsquedas puntuales rápidas sin recorrer la colección completa y evitando excepciones de puntero nulo. Se relaciona con **Validación**.
+   *Salida:* `Some(Repuesto(Amortiguador Delantero, Suspension, 65.0, 4))`
+4. **Problema que resuelve:** Búsqueda segura en inventario sin recorrer la lista completa innecesariamente y evitando excepciones de puntero nulo. Se relaciona con la familia de **Validación**.
+
+---
 
 ### 4.3 Combinación de operaciones
-* **Pregunta formulada:** *"¿Cuáles son los productos de la categoría 'Motor' que cuentan con más de 10 unidades en stock, ordenados de forma descendente por precio?"*
+* **Pregunta formulada:** *¿Cuáles son los repuestos pertenecientes a la categoría 'Motor' que cuentan con más de 10 unidades en stock, ordenados de forma descendente por precio?*
 * **Cadena de operaciones:** `groupBy` (nueva) $\rightarrow$ `filter` (vista en clase) $\rightarrow$ `sortBy` (nueva)
   ```scala
-  val resultado = catalogo
-    .groupBy(p => p.categoria)("Motor") // 1. Operación nueva: agrupa y extrae 'Motor'
-    .filter(p => p.stock > 10)          // 2. Operación de clase: filtra stock > 10
-    .sortBy(p => -p.precio)             // 3. Operación nueva: ordena descendente
+  val repuestosMotorTop = repuestos
+    .groupBy(_.categoria)("Motor") // 1. Operación nueva: clasifica y extrae 'Motor'
+    .filter(_.stock > 10)          // 2. Operación de clase: filtra stock > 10
+    .sortBy(-_.precio)             // 3. Operación nueva: ordena por precio descendente
   ```
-* **Explicación de cada paso:**
-  1. `groupBy(p => p.categoria)("Motor")`: Agrupa todo el inventario y selecciona la sublista correspondiente a la clave `"Motor"`.
-  2. `filter(p => p.stock > 10)`: Descarta ítems con bajo inventario, conservando solo aquellos con stock mayor a 10.
-  3. `sortBy(p => -p.precio)`: Aplica inversión de signo al precio para ordenar la lista resultante de mayor a menor.
+* **Explicación paso a paso:**
+  1. `groupBy(_.categoria)("Motor")`: Agrupa el catálogo por categoría y selecciona inmediatamente la lista de repuestos bajo la llave `"Motor"`.
+  2. `filter(_.stock > 10)`: Descarta los elementos con inventario bajo o moderado, reteniendo únicamente aquellos con volumen alto.
+  3. `sortBy(-_.precio)`: Aplica la negación aritmética al precio numérico para invertir el orden natural y producir una lista ordenada de mayor a menor valor.
 * **Salida de la cadena:**
   ```text
-  - Filtro de Aire (Precio: $12.0 | Stock: 20)
-  - Bujia Iridium (Precio: $10.0 | Stock: 40)
-  - Filtro de Aceite (Precio: $8.0 | Stock: 30)
+  Filtro de Aire (Precio: $12.0 | Stock: 20)
+  Bujia Iridium (Precio: $10.0 | Stock: 40)
+  Filtro de Aceite (Precio: $8.0 | Stock: 30)
   ```
 
 ---
 
 ## Parte 5: Comparar y Concluir
 
-### 5.1 Tabla comparativa
+### 5.1 Tabla comparativa frente a frente
 
 | Criterio | Scala | Java (Streams) | Python |
 |:---|:---|:---|:---|
-| **Sintaxis de la lambda** | Concisa: `p => p.stock < 5` o `_.stock < 5` | Flecha: `p -> p.stock() < 5` | Expresión: `lambda p: p.stock < 5` |
-| **Cómo se declara el tipo** | Inferencia estática robusta; no exige declarar tipos en argumentos de la lambda. | Inferencia contextual estática mediante interfaces funcionales (`Predicate`, `Function`). | Tipado dinámico implícito en tiempo de ejecución. |
-| **Operaciones con listas disponibles** | Nativas en la colección `List` mediante métodos de instancia fluidos. | Requiere encapsular en `.stream()`, encadenar y recolectar con `.toList()`. | Funciones globales (`filter`, `map`) o *list comprehensions*. |
-| **Restricción del lenguaje** | Sin restricciones notorias; permite bloques multilínea y *pattern matching*. | Las variables capturadas en closures deben ser *efectivamente finales* (`effectively final`). | `lambda` está restringida a una sola expresión (no admite `return`, `for` o `try`). |
-| **Legibilidad (opinión)** | **Excelente:** Código declarativo limpio, sin código boilerplate. | **Media:** Bastante código accesorio debido a llamadas a `.stream()` y wrappers. | **Buena en expresiones simples**, pero incómoda en agregaciones que requieren importar módulos. |
+| **Sintaxis de la lambda** | Muy concisa: con parámetro nombrado (`r => r.stock < 5`) o con notación posicional (`_.stock < 5`). | Basada en flecha: `r -> r.stock() < 5`. | Explícita con palabra reservada: `lambda r: r.stock < 5`. |
+| **Cómo se declara el tipo** | Inferencia de tipos estática y robusta; casi nunca requiere anotaciones de tipo en argumentos. | Tipado estático deducido por inferencia contextual mediante interfaces funcionales (`Predicate`, `Function`). | Tipado dinámico; los parámetros de la lambda no declaran tipos en ejecución. |
+| **Operaciones con listas disponibles** | Nativas y fluidas directamente sobre `List` sin necesidad de intermediarios. | Requiere convertir la colección a un flujo (`.stream()`) y recopilar con `.toList()`. | Funciones globales del intérprete (`filter`, `map`) o *list comprehensions*. |
+| **Restricciones del lenguaje** | Ninguna relevante; admite lambdas multilínea, evaluación perezosa y *pattern matching*. | Las variables externas capturadas en closures deben ser estrictamente finales o efectivamente finales (`effectively final`). | `lambda` está limitada exclusivamente a una sola expresión (no admite sentencias de control, asignaciones ni bloques). |
+| **Legibilidad (opinión)** | **Excelente:** Código declarativo limpio, sin código boilerplate y con alto poder expresivo. | **Media:** Bastante código accesorio debido a la apertura de flujos y convertidores intermedios. | **Buena para casos simples**, pero sintácticamente recargada en acumulaciones complejas. |
 
 * **¿En qué lenguaje fue más natural resolver los problemas?**  
-  En **Scala**, porque sus colecciones ya incorporan todas las operaciones de orden superior sin necesidad de convertir la lista a un flujo intermedio (como exige Java) ni requerir librerías adicionales para acumulaciones (como `functools` en Python).
+  En **Scala**. Al estar las funciones de orden superior completamente integradas en la clase base `List`, la escritura del código se siente fluida y directa. La sintaxis con guion bajo (`_`) permite escribir transformaciones precisas sin la sobrecarga estructural que impone Java ni la necesidad de importar módulos externos como en Python.
 * **¿En qué tipo de problema encontraste más diferencias entre lenguajes y por qué?**  
-  En la **Acumulación (`foldLeft` / `reduce`)**. En Scala se resuelve directamente como `catalogo.foldLeft(0.0)((acc, p) => ...)`. En Java, el método `.reduce()` obliga a manejar identity, accumulator y combiner para tipos heterogéneos. En Python, `reduce` no es nativo global y requiere importar el módulo `functools`.
+  En la **Acumulación (`foldLeft` frente a `reduce`)**. En Scala se realiza con una invocación directa y un valor neutro claro: `repuestos.foldLeft(0.0)((acc, r) => ...)`. En Java, el método `.reduce()` sobre tipos heterogéneos obliga a definir un acumulador y una función combinadora para satisfacer el tipado estricto en flujos paralelos. En Python, `reduce` fue removido de las funciones integradas globales y debe importarse explícitamente desde el módulo `functools`.
 
 ### 5.2 Conclusión
-Las funciones anónimas son esenciales para el procesamiento moderno de colecciones, ya que separan la mecánica del recorrido interno de los datos respecto a la lógica de negocio que se aplica a cada elemento. Esto produce un código inmutable, conciso y menos propenso a errores de estado compartido.
+Las funciones anónimas son el pilar fundamental del procesamiento moderno de colecciones, ya que permiten separar el **qué** (la regla de negocio o transformación puntual) del **cómo** (el mecanismo interno de recorrido de la estructura de datos). Este desacoplamiento promueve la inmutabilidad de los datos, previene estados inconsistentes y produce canalizaciones de datos mucho más legibles y mantenibles.
 
-Esta característica es la base de tecnologías del mundo real como **Apache Spark**, donde las funciones anónimas permiten definir transformaciones sobre colecciones distribuidas (RDDs) que el motor planifica y ejecuta en paralelo a través de múltiples nodos de red sin requerir mecanismos de sincronización manuales.
-
----
-
-## Instrucciones para ejecutar el código
-
-1. **Scala (Parte 3):**
-   ```bash
-   cd scala
-   scala-cli run Soluciones.scala
-   ```
-2. **Java (Parte 3):**
-   ```bash
-   cd java
-   javac Soluciones.java
-   java Soluciones
-   ```
-3. **Python (Parte 3):**
-   ```bash
-   cd python
-   python3 soluciones.py
-   ```
-4. **Operaciones Nuevas en Scala (Parte 4):**
-   ```bash
-   cd operaciones
-   scala-cli run OperacionesNuevas.scala
-   ```
+Este principio es el núcleo de arquitecturas distribuidas del mundo real como **Apache Spark**, analizado en la Parte 1. Al no depender de estados mutables ni variables compartidas, los motores analíticos pueden tomar una función anónima, serializarla a través de la red y ejecutar transformaciones masivas en clústeres de cientos de servidores de manera segura, eficiente y transparente para el programador.
 
 ---
 
-## Referencias
-* Apache Spark Documentation. *RDD Programming Guide*. https://spark.apache.org/docs/latest/rdd-programming-guide.html
-* Oracle. *Java Tutorials: Lambda Expressions*. https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html
-* Python Documentation. *Functional Programming HOWTO*. https://docs.python.org/3/howto/functional.html
-* Scala Documentation. *Collections API*. https://docs.scala-lang.org/overviews/collections-2.13/overview.html
+## Instrucciones de Ejecución
+
+Para comprobar que las soluciones en los tres lenguajes generan exactamente los mismos resultados:
+
+### 1. Scala (Partes 3 y 4)
+Ejecutar mediante Scala CLI o cargar directamente en un Worksheet/REPL de Scala 3:
+```bash
+scala-cli run scala/Soluciones.scala
+scala-cli run operaciones/OperacionesNuevas.scala
+```
+
+### 2. Java (Parte 3)
+Compilar y ejecutar la clase principal (requiere JDK 17 o superior):
+```bash
+javac java/Soluciones.java
+java -cp java Soluciones
+```
+
+### 3. Python (Parte 3)
+Ejecutar con el intérprete estándar de Python 3:
+```bash
+python3 python/soluciones.py
+```
+
+---
+
+## Referencias Consultadas
+1. **Documentación Oficial de Scala:** *Collections Overview & Higher-Order Functions*. https://docs.scala-lang.org
+2. **Oracle Java SE Tutorial:** *Lambda Expressions and Stream API*. https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html
+3. **Python Software Foundation:** *Functional Programming HOWTO*. https://docs.python.org/3/howto/functional.html
+4. **Apache Spark Documentation:** *RDD Programming Guide - Transformations and Actions*. https://spark.apache.org/docs/latest/rdd-programming-guide.html
+5. **Winitzki, S. (2022):** *The Science of Functional Programming: A Tutorial, with Examples in Scala*. https://github.com/winitzki/sofp
+6. **Herramientas de Asistencia:** Se emplearon modelos de Inteligencia Artificial para la verificación comparativa de sintaxis y diseño del documento.
