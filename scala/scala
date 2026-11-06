@@ -1,0 +1,51 @@
+// Archivo: scala/Soluciones.scala
+// Soluciones a los 4 problemas seleccionados de la Parte 3 en Scala 3
+
+case class Producto(
+id: Int,
+nombre: String,
+categoria: String,
+precio: Double,
+stock: Int
+)
+
+object Soluciones {
+def main(args: Array[String]): Unit = {
+// 1. Colección común de 10 productos de prueba
+val productos = List(
+Producto(1, "Laptop Lenovo", "Computo", 850.0, 12),
+Producto(2, "Mouse Logitech", "Accesorios", 25.0, 45),
+Producto(3, "Monitor LG 27", "Pantallas", 280.0, 8),
+Producto(4, "Teclado Mecanico", "Accesorios", 75.0, 0),
+Producto(5, "Disco SSD 1TB", "Almacenamiento", 95.0, 20),
+Producto(6, "Memoria RAM 16GB", "Componentes", 60.0, 15),
+Producto(7, "Cable HDMI 2m", "Accesorios", 12.0, 100),
+Producto(8, "Impresora HP", "Oficina", 180.0, 4),
+Producto(9, "Tablet Samsung", "Computo", 320.0, 7),
+Producto(10, "Micro SD 128GB", "Almacenamiento", 18.0, 0)
+)
+
+println("=== PARTE 3: SOLUCIONES EN SCALA ===")
+
+// Problema 1: Selección (filter) - Productos sin stock
+val agotados = productos.filter(p => p.stock == 0)
+val nombresAgotados = agotados.map(p => p.nombre)
+println(s"[Problema 1 - Seleccion] Agotados: \$nombresAgotados")
+
+// Problema 2: Transformación (map) - Etiquetas de precios con 15% de impuesto (IVA)
+val etiquetas = productos.map(p => f"${p.nombre}:$\$\${p.precio * 1.15}%.2f")
+println("[Problema 2 - Transformacion] Primeras 3 etiquetas:")
+etiquetas.take(3).foreach(e => println(s"  \$e"))
+
+// Problema 3: Validación (exists y forall) - Reglas de auditoría de catálogo
+val hayExcesivo = productos.exists(p => p.precio > 800.0)
+val todosValidos = productos.forall(p => p.precio > 0.0)
+println(s"[Problema 3 - Validacion] ¿Hay > 800?: $hayExcesivo \vert{} ¿Todos > 0?: $todosValidos")
+
+// Problema 4: Extremos (maxBy) - Producto más costoso
+val masCaro = productos.maxBy(p => p.precio)
+println(s"[Problema 4 - Extremos] Producto mas costoso: ${masCaro.nombre} ($\$\${masCaro.precio})")
+
+
+}
+}
